@@ -1,0 +1,56 @@
+name       : mlt6
+version    : 6.24.0
+release    : 1
+source     :
+    - https://github.com/mltframework/mlt/archive/v6.24.0.tar.gz : 3b977c5632329fca7634d0034162df6d5b79cde3256bac43e7ba8353acced61e
+license    :
+    - GPL-2.0-or-later
+    - GPL-3.0-or-later
+    - LGPL-2.1-or-later
+component  : multimedia.library
+summary    : Multimedia framework designed for television broadcasting.
+description: |
+    Multimedia framework designed for television broadcasting.
+patterns   :
+    - python :
+        - /usr/lib64/python3.*/site-packages/*
+builddeps  :
+    - pkgconfig(alsa)
+    - pkgconfig(fftw3)
+    - pkgconfig(frei0r)
+    - pkgconfig(gl)
+    - pkgconfig(libavformat)
+    - pkgconfig(libexif)
+    - pkgconfig(libpulse)
+    - pkgconfig(movit)
+    - pkgconfig(python3)
+    - pkgconfig(Qt5Svg)
+    - pkgconfig(samplerate)
+    - pkgconfig(SDL2_image)
+    - pkgconfig(vidstab)
+    - pkgconfig(x11)
+    - swig
+rundeps    :
+    - frei0r
+setup      : |
+    %patch -p1 < $pkgfiles/0002-Fix-make-install-for-lumas.patch
+    %configure \
+        --enable-gpl \
+        --enable-gpl3 \
+        --enable-opengl \
+        --enable-lumas \
+        --enable-mmx \
+        --enable-sse \
+        --swig-languages=python
+build      : |
+    %make
+install    : |
+    %make_install
+
+    mv $installdir/usr/bin/melt{,6}
+
+        # install python swig bindings
+    PYTHON_MODULES_DIR=$installdir/usr/lib64/python%python3_version%/site-packages
+
+    install -Dm 00644 $workdir/src/swig/python/_mlt.so $PYTHON_MODULES_DIR/_mlt.so
+    install -Dm 00644 $workdir/src/swig/python/mlt.py $PYTHON_MODULES_DIR/mlt.py
